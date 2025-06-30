@@ -26,6 +26,14 @@ fn rule_invalid_type(message: &Message, problems: &mut Problems) {
     }
 }
 
+fn rule_type_not_lowercase(message: &Message, problems: &mut Problems) {
+    let Some(type_) = message.type_ else { return };
+    if type_.chars().any(|c| c.is_uppercase()) {
+        problems.report("Commit message type must be lowercase. (example: `feat: ...`)".to_owned());
+    }
+}
+
 pub fn check_all_rules(message: &Message, problems: &mut Problems) {
     rule_invalid_type(message, problems);
+    rule_type_not_lowercase(message, problems);
 }

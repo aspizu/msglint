@@ -7,13 +7,7 @@ use colored::{
     Color,
     Colorize,
 };
-
-use crate::cli::cli;
-
-mod cli;
-mod messages;
-mod problems;
-mod rules;
+use msglint::cli::cli;
 
 fn main() -> ExitCode {
     let begin = Instant::now();

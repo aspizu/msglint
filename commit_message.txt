@@ -1,4 +1,4 @@
-feet: add new authentication system
+FEAT: add new authentication system
 
 Implement OAuth 2.0 integration with support for Google and GitHub providers.
 This allows users to sign in using their existing accounts and improves

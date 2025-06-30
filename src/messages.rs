@@ -52,14 +52,9 @@ fn parse_header<'a>(text: &'a str) -> Header<'a> {
     let scope = captures.get(2).map(|m| m.as_str()).unwrap_or_default();
     let ex_mark = captures.get(3).is_some();
     let whitespace_after_type = captures.get(4).map(|m| m.as_str()).unwrap_or_default();
-    let prefix = format!(
-        "{}{}{}{}:",
-        type_,
-        scope,
-        if ex_mark { "!" } else { "" },
-        whitespace_after_type
-    );
-    let title = &text[prefix.len()..];
+    let prefix_len =
+        type_.len() + scope.len() + if ex_mark { 1 } else { 0 } + whitespace_after_type.len() + 1;
+    let title = &text[prefix_len..];
     Header {
         type_,
         scope,
@@ -84,14 +79,15 @@ fn find_problems_in_header(header: &Header, problems: &mut Problems) {
     if header.scope.ends_with(" )") {
         problems.report("Whitespace after commit message scope.".to_string());
     }
+    let header_is_empty = header.title.trim().is_empty();
     if header.title.starts_with(' ') {
-        if !header.title.trim().is_empty() && header.title[1..].starts_with(' ') {
+        if !header_is_empty && header.title[1..].starts_with(' ') {
             problems.report("Whitespace before commit message title.".to_string());
         }
     } else {
         problems.report("No space before commit message title.".to_string());
     }
-    if !header.title.trim().is_empty() && header.title.ends_with(' ') {
+    if !header_is_empty && header.title.ends_with(' ') {
         problems.report("Whitespace after commit message title.".to_string());
     }
 }
@@ -118,7 +114,7 @@ fn parse_body<'a>(text: &'a str) -> Body<'a> {
     }
     let body = &body[..body.len() - newlines_after];
     let footers: Vec<Footer> = footers
-        .iter()
+        .into_iter()
         .rev()
         .map(|footer| {
             let (key, value) = footer.split_once(':').unwrap();
