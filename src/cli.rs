@@ -29,6 +29,7 @@ use crate::{
 
 #[derive(Parser)]
 #[command(version=env!("CARGO_PKG_VERSION"))]
+#[command(about = env!("CARGO_PKG_DESCRIPTION"))]
 pub struct Cli {
     /// Checks the contents of the given file for problems.
     #[arg(short, long)]
