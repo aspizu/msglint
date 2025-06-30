@@ -20,8 +20,8 @@ cargo install --git https://github.com/aspizu/msglint
 
 ### Install the git hook into your repository
 
-!!! NOTE
-    You will have to do this for every repository.
+> [!NOTE] 
+> You will have to do this for every repository.
 
 ```shell
 msglint --install
