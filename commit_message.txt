@@ -1,0 +1,18 @@
+feet: add new authentication system
+
+Implement OAuth 2.0 integration with support for Google and GitHub providers.
+This allows users to sign in using their existing accounts and improves
+the overall user experience by reducing the need for password management.
+
+- Add OAuth provider configurations
+- Implement token validation middleware
+- Add user profile synchronization
+- Update login/logout flows
+- Add comprehensive test suite for auth flows
+
+BREAKING CHANGE: The previous basic auth system has been removed. Users will
+need to migrate to OAuth authentication.
+
+Closes #123
+Fixes #456
+Co-authored-by: Jane Doe <jane@example.com>

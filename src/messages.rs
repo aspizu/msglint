@@ -1,15 +1,6 @@
-use lazy_static::lazy_static;
 use regex::Regex;
 
-use crate::{
-    problems::PROBLEMS,
-    report,
-};
-
-lazy_static! {
-    pub static ref TYPE_RE: Regex =
-        Regex::new(r"^([a-zA-Z\-_\s/]+)(\([a-zA-Z\-_\s/]+\))?(!)?(\s*):").unwrap();
-}
+use crate::problems::Problems;
 
 #[derive(Debug)]
 pub struct Footer<'a> {
@@ -50,7 +41,8 @@ fn string_to_option<'a>(text: &'a str) -> Option<&'a str> {
 }
 
 fn parse_header<'a>(text: &'a str) -> Header<'a> {
-    let Some(captures) = TYPE_RE.captures(text) else {
+    let regex: Regex = Regex::new(r"^([a-zA-Z\-_\s/]+)(\([a-zA-Z\-_\s/]+\))?(!)?(\s*):").unwrap();
+    let Some(captures) = regex.captures(text) else {
         return Header {
             title: text,
             ..Default::default()
@@ -77,30 +69,30 @@ fn parse_header<'a>(text: &'a str) -> Header<'a> {
     }
 }
 
-fn find_problems_in_header(header: &Header) {
+fn find_problems_in_header(header: &Header, problems: &mut Problems) {
     if !header.type_.trim().is_empty() && header.type_.starts_with(' ') {
-        report!("Whitespace before commit message type.");
+        problems.report("Whitespace before commit message type.".to_string());
     }
     if header.whitespace_after_type.len() > 0
         || (!header.type_.trim().is_empty() && header.type_.ends_with(' '))
     {
-        report!("Whitespace after commit message type.");
+        problems.report("Whitespace after commit message type.".to_string());
     }
     if header.scope.starts_with("( ") {
-        report!("Whitespace before commit message scope.");
+        problems.report("Whitespace before commit message scope.".to_string());
     }
     if header.scope.ends_with(" )") {
-        report!("Whitespace after commit message scope.");
+        problems.report("Whitespace after commit message scope.".to_string());
     }
     if header.title.starts_with(' ') {
         if !header.title.trim().is_empty() && header.title[1..].starts_with(' ') {
-            report!("Whitespace before commit message title.");
+            problems.report("Whitespace before commit message title.".to_string());
         }
     } else {
-        report!("No space before commit message title.");
+        problems.report("No space before commit message title.".to_string());
     }
     if !header.title.trim().is_empty() && header.title.ends_with(' ') {
-        report!("Whitespace after commit message title.");
+        problems.report("Whitespace after commit message title.".to_string());
     }
 }
 
@@ -144,31 +136,35 @@ fn parse_body<'a>(text: &'a str) -> Body<'a> {
     }
 }
 
-fn find_problems_in_body(header: &Header, body: &Body) {
+fn find_problems_in_body(header: &Header, body: &Body, problems: &mut Problems) {
     if !body.body.is_empty() && body.newlines_before != 1 {
-        report!("Commit message title and body must be separated by a single newline.");
+        problems.report(
+            "Commit message title and body must be separated by a single newline.".to_string(),
+        );
     }
     if !body.body.is_empty() && body.newlines_after != 1 {
-        report!("Commit message body and footer must be separated by a single newline.");
+        problems.report(
+            "Commit message body and footer must be separated by a single newline.".to_string(),
+        );
     }
     if header.ex_mark && !body.is_breaking_change {
-        report!(
-            "Breaking changes should be explained in a footer after the commit message. (example: `BREAKING CHANGE: ...`)"
-        )
+        problems.report(
+            "Breaking changes should be explained in a footer after the commit message. (example: `BREAKING CHANGE: ...`)".to_string()
+        );
     }
     if body.is_breaking_change && !header.ex_mark {
-        report!(
-            "Breaking changes should be marked with `!` after the commit message type. (example: `feat!: ...`)"
+        problems.report(
+            "Breaking changes should be marked with `!` after the commit message type. (example: `feat!: ...`)".to_string()
         );
     }
 }
 
-pub fn parse_message<'a>(text: &'a str) -> Message<'a> {
+pub fn parse_message<'a>(text: &'a str, problems: &mut Problems) -> Message<'a> {
     let first_line = text.split_once('\n').map(|(p, _)| p).unwrap_or(text);
     let header = parse_header(first_line);
     let body = parse_body(&text[(first_line.len() + 1).min(text.len())..]);
-    find_problems_in_header(&header);
-    find_problems_in_body(&header, &body);
+    find_problems_in_header(&header, problems);
+    find_problems_in_body(&header, &body, problems);
     Message {
         type_: string_to_option(header.type_),
         scope: string_to_option(

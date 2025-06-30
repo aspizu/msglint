@@ -13,8 +13,8 @@ use colored::Colorize;
 use crate::{
     messages::parse_message,
     problems::{
-        PROBLEMS,
         Problem,
+        Problems,
     },
     rules::check_all_rules,
 };
@@ -45,29 +45,28 @@ fn read_message_content(cli: Cli) -> anyhow::Result<String> {
     }
 }
 
-fn display_problems() {
-    PROBLEMS.with_borrow(|problems| {
-        for problem in &problems.problems {
-            display_problem(problem);
-        }
-        if problems.problems.len() == 1 {
-            println!("{}", "Found 1 problem".red().bold())
-        } else if problems.problems.len() > 1 {
-            println!(
-                "{}{}{}",
-                "Found ".red().bold(),
-                problems.problems.len().to_string().red().bold(),
-                " problems".red().bold()
-            )
-        }
-    })
+fn display_problems(problems: &Problems) {
+    for problem in &problems.problems {
+        display_problem(problem);
+    }
+    if problems.problems.len() == 1 {
+        println!("{}", "Found 1 problem".red().bold())
+    } else if problems.problems.len() > 1 {
+        println!(
+            "{}{}{}",
+            "Found ".red().bold(),
+            problems.problems.len().to_string().red().bold(),
+            " problems".red().bold()
+        )
+    }
 }
 
 pub fn cli() -> anyhow::Result<()> {
     let cli = Cli::parse();
     let message_content = read_message_content(cli)?;
-    let message = parse_message(&message_content);
-    check_all_rules(&message);
-    display_problems();
+    let mut problems = Problems::new();
+    let message = parse_message(&message_content, &mut problems);
+    check_all_rules(&message, &mut problems);
+    display_problems(&problems);
     Ok(())
 }
