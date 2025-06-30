@@ -61,12 +61,12 @@ fn display_problems(problems: &Problems) {
     }
 }
 
-pub fn cli() -> anyhow::Result<()> {
+pub fn cli() -> anyhow::Result<bool> {
     let cli = Cli::parse();
     let message_content = read_message_content(cli)?;
     let mut problems = Problems::new();
     let message = parse_message(&message_content, &mut problems);
     check_all_rules(&message, &mut problems);
     display_problems(&problems);
-    Ok(())
+    Ok(problems.problems.is_empty())
 }

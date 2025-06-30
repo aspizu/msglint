@@ -1,16 +1,9 @@
-use std::{
-    process::ExitCode,
-    time::Instant,
-};
+use std::process::ExitCode;
 
-use colored::{
-    Color,
-    Colorize,
-};
+use colored::Colorize;
 use msglint::cli::cli;
 
 fn main() -> ExitCode {
-    let begin = Instant::now();
     std::panic::set_hook(Box::new(|info| {
         eprintln!(
             "{info}\n{}\nopen an issue at {}",
@@ -22,17 +15,7 @@ fn main() -> ExitCode {
     if let Err(error) = &result {
         eprintln!("{}{} {error}", "error".bold().red(), ":".bold());
     }
-    let color = if result.is_ok() {
-        Color::Green
-    } else {
-        Color::Red
-    };
-    eprintln!(
-        "{} in {:?}",
-        "Finished".color(color).bold(),
-        begin.elapsed()
-    );
-    if result.is_ok() {
+    if result.is_ok_and(|result| result) {
         ExitCode::SUCCESS
     } else {
         ExitCode::FAILURE
