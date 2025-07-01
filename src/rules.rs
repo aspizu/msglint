@@ -81,19 +81,16 @@ fn rule_no_exmark(message: &Message, problems: &mut Problems) {
     }
 }
 
-const BANNED_WORDS: &[&str] = &["stuff", "thing"];
-
 fn rule_banned_words(message: &Message, problems: &mut Problems) {
+    let regex = Regex::new(r"(?i)\b(stuff|things?)\b").unwrap();
     let Some(title) = message.title else { return };
-    let title = title.to_lowercase();
-    for word in BANNED_WORDS {
-        if title.contains(word) {
-            problems.report(format!(
-                "Commit message title should not contain '{}'.",
-                word
-            ));
-        }
-    }
+    let Some(word) = regex.find(title) else {
+        return;
+    };
+    problems.report(format!(
+        "Commit message title should not contain the word `{}`.",
+        word.as_str()
+    ));
 }
 
 pub fn check_all_rules(message: &Message, problems: &mut Problems) {
