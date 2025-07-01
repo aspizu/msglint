@@ -42,3 +42,37 @@ msglint commit-message.txt
 ```shell
 rm .git/hooks/commit-msg
 ```
+
+## Integration
+
+### `pre-commit`
+
+It's recommended to not use `pre-commit` to handle `msglint`. If you don't already have
+`pre-commit` hooks that run on `commit-msg`, don't install `pre-commit` into `commit-msg`.
+Just install `msglint` directly into `commit-msg`.
+
+First, specify the `commit-msg` hook to be installed by default when you
+do `pre-commit install` in `.pre-commit-config.yaml`.
+
+```yaml
+default_install_hook_types: [pre-commit, commit-msg]
+```
+
+Install `pre-commit` into the `commit-msg` hook.
+
+```shell
+pre-commit install --hook-type commit-msg
+```
+
+Add the `msglint` hook to `.pre-commit-config.yaml`.
+
+```yaml
+repos:
+    - repo: local
+      hooks:
+          - id: msglint
+            name: msglint
+            language: system
+            entry: msglint
+            stages: [commit-msg]
+```
