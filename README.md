@@ -31,16 +31,10 @@ cargo install --git https://github.com/aspizu/msglint
 msglint --install
 ```
 
-### Test a commit message from the command-line
-
-```shell
-msglint -m "feet: add stuff"
-```
-
 ### Test a commit message from a file
 
 ```shell
-msglint -f message.txt
+msglint commit-message.txt
 ```
 
 ### Uninstall the git hook from a repository
