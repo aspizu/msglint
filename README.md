@@ -1,5 +1,9 @@
 # msglint
 
+Checks your commit messages.
+
+![](./docs/assets/screenshot.png)
+
 ## Installation
 
 ### Install from source
