@@ -31,12 +31,9 @@ use crate::{
 #[command(version=env!("CARGO_PKG_VERSION"))]
 #[command(about = env!("CARGO_PKG_DESCRIPTION"))]
 pub struct Cli {
-    /// Checks the contents of the given file for problems.
-    #[arg(short, long)]
+    /// Checks the contents of the given file for problems, If not provided, reads from standard input.
+    #[arg()]
     pub file: Option<PathBuf>,
-    /// Checks the given message argument for problems. If provided `--file` is ignored.
-    #[arg(short, long)]
-    pub message: Option<String>,
     /// Install hook into `.git/hooks/commit-msg` in the current repository. If provided, all other options are ignored.
     #[arg(short, long)]
     pub install: bool,
@@ -47,9 +44,6 @@ fn display_problem(problem: &Problem) {
 }
 
 fn read_message_content(cli: Cli) -> anyhow::Result<String> {
-    if let Some(message_content) = cli.message {
-        return Ok(message_content);
-    }
     if let Some(file_path) = cli.file {
         Ok(fs::read_to_string(file_path)?)
     } else {
@@ -79,11 +73,11 @@ fn install() -> anyhow::Result<()> {
     let path = Path::new("./.git/hooks/commit-msg");
     if path.exists() {
         bail!(
-            "file `.git/hooks/commit-msg` already exists. If it's a shell script, append:\nmsglint -f \"$1\"\nexit"
+            "file `.git/hooks/commit-msg` already exists. If it's a shell script, append:\nmsglint \"$1\"\nexit"
         );
     }
     let mut file = File::create(path)?;
-    file.write_all("#!/bin/bash\nmsglint -f \"$1\"\nexit\n".as_bytes())?;
+    file.write_all("#!/bin/bash\nmsglint \"$1\"\nexit\n".as_bytes())?;
     Ok(())
 }
 
