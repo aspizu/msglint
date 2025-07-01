@@ -93,6 +93,26 @@ fn rule_banned_words(message: &Message, problems: &mut Problems) {
     ));
 }
 
+fn rule_typos(message: &Message, problems: &mut Problems) {
+    let Some(title) = message.title else { return };
+    let tokenizer = typos::tokens::Tokenizer::default();
+    let dict = typos_cli::dict::BuiltIn::new(Default::default());
+    let typos = typos::check_str(title, &tokenizer, &dict);
+    for typo in typos {
+        match typo.corrections {
+            typos::Status::Valid => todo!(),
+            typos::Status::Invalid => todo!(),
+            typos::Status::Corrections(cows) => {
+                let correction = &cows[0];
+                problems.report(format!(
+                    "In commit message title, `{}` should be `{}`.",
+                    typo.typo, correction
+                ));
+            }
+        }
+    }
+}
+
 pub fn check_all_rules(message: &Message, problems: &mut Problems) {
     rule_missing_type(message, problems);
     rule_missing_title(message, problems);
@@ -102,4 +122,5 @@ pub fn check_all_rules(message: &Message, problems: &mut Problems) {
     rule_no_period(message, problems);
     rule_no_exmark(message, problems);
     rule_banned_words(message, problems);
+    rule_typos(message, problems);
 }
