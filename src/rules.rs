@@ -130,6 +130,26 @@ fn rule_not_imperative(message: &Message, problems: &mut Problems) {
     ));
 }
 
+fn rule_min_title_length(message: &Message, problems: &mut Problems) {
+    let Some(title) = message.title else { return };
+    if title.len() < 10 {
+        problems.report(format!(
+            "Commit message title is too short. ({} < 10)",
+            title.len()
+        ));
+    }
+}
+
+fn rule_max_title_length(message: &Message, problems: &mut Problems) {
+    let Some(title) = message.title else { return };
+    if title.len() > 72 {
+        problems.report(format!(
+            "Commit message title is too long. ({} > 72)",
+            title.len()
+        ));
+    }
+}
+
 pub fn check_all_rules(message: &Message, problems: &mut Problems) {
     rule_missing_type(message, problems);
     rule_missing_title(message, problems);
@@ -141,4 +161,6 @@ pub fn check_all_rules(message: &Message, problems: &mut Problems) {
     rule_banned_words(message, problems);
     rule_typos(message, problems);
     rule_not_imperative(message, problems);
+    rule_min_title_length(message, problems);
+    rule_max_title_length(message, problems);
 }
