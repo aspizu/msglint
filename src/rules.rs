@@ -113,6 +113,23 @@ fn rule_typos(message: &Message, problems: &mut Problems) {
     }
 }
 
+fn rule_not_imperative(message: &Message, problems: &mut Problems) {
+    let words = include_str!("./dictionary/past-participles.txt").replace('\n', "|");
+    let mut words = words.as_str();
+    if words.ends_with('|') {
+        words = &words[..words.len() - 1];
+    }
+    let regex = Regex::new(format!(r"(?i)\b({})\b", words).as_str()).unwrap();
+    let Some(title) = message.title else { return };
+    let Some(word) = regex.find(title) else {
+        return;
+    };
+    problems.report(format!(
+        "Commit message title should be in imperative mood. (found `{}`)",
+        word.as_str()
+    ));
+}
+
 pub fn check_all_rules(message: &Message, problems: &mut Problems) {
     rule_missing_type(message, problems);
     rule_missing_title(message, problems);
@@ -123,4 +140,5 @@ pub fn check_all_rules(message: &Message, problems: &mut Problems) {
     rule_no_exmark(message, problems);
     rule_banned_words(message, problems);
     rule_typos(message, problems);
+    rule_not_imperative(message, problems);
 }
