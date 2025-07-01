@@ -81,6 +81,21 @@ fn rule_no_exmark(message: &Message, problems: &mut Problems) {
     }
 }
 
+const BANNED_WORDS: &[&str] = &["stuff", "thing"];
+
+fn rule_banned_words(message: &Message, problems: &mut Problems) {
+    let Some(title) = message.title else { return };
+    let title = title.to_lowercase();
+    for word in BANNED_WORDS {
+        if title.contains(word) {
+            problems.report(format!(
+                "Commit message title should not contain '{}'.",
+                word
+            ));
+        }
+    }
+}
+
 pub fn check_all_rules(message: &Message, problems: &mut Problems) {
     rule_missing_type(message, problems);
     rule_missing_title(message, problems);
@@ -89,4 +104,5 @@ pub fn check_all_rules(message: &Message, problems: &mut Problems) {
     rule_first_word_capitalized(message, problems);
     rule_no_period(message, problems);
     rule_no_exmark(message, problems);
+    rule_banned_words(message, problems);
 }
