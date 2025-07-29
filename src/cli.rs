@@ -78,6 +78,14 @@ fn install() -> anyhow::Result<()> {
     }
     let mut file = File::create(path)?;
     file.write_all("#!/bin/bash\nmsglint \"$1\"\nexit\n".as_bytes())?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+
+        let mut permissions = file.metadata()?.permissions();
+        permissions.set_mode(0o755);
+        fs::set_permissions(path, permissions)?;
+    }
     Ok(())
 }
 
