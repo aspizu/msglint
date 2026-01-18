@@ -2,7 +2,7 @@
 
 Checks your commit messages.
 
-![](./docs/assets/screenshot.png)
+![screenshot](https://github.com/aspizu/msglint/raw/main/docs/assets/screenshot.png)
 
 ## Installation
 
